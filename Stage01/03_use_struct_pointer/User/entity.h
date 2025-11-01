@@ -31,4 +31,4 @@ typedef struct
 #define RCC ((RCC_Typedef*)0x40021000)
 #define GPIOA ((GPIOA_Typedef*)0x40010800)
 
-#endif
+#endif	// __ENTITY_H__
