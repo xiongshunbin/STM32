@@ -9,5 +9,6 @@
 void LED_Configuration(void);
 void Key_Configuration(void);
 int Key_Scan(GPIO_TypeDef* GPIOx, u16 GPIO_Pin);
+void Delay(unsigned long nCount);
 
 #endif	// __LED_KEY_H__
