@@ -1,5 +1,10 @@
 #include "bsp_exti.h"
 
+void wait(unsigned long nCount)
+{
+	while (nCount--);
+}
+
 void PA0_EXTI0_Configuration(void)
 {
 	NVIC_InitTypeDef NVIC_InitStructure;
@@ -31,4 +36,22 @@ void PA0_EXTI0_Configuration(void)
 	EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Falling;
 	EXTI_InitStructure.EXTI_LineCmd = ENABLE;
 	EXTI_Init(&EXTI_InitStructure);
+}
+
+/*
+ * 当中断发生时, 中断标志位会自动发生置位;
+ * 当中断服务程序处理完中断后, 需要手动清除中断标志位, 否则将持续触发中断。
+*/
+void EXTI0_IRQHandler(void)
+{
+	// 检查指定的EXTI0线路是否触发中断请求
+	ITStatus EXTIStatus;
+	EXTIStatus = EXTI_GetITStatus(EXTI_Line0);
+	if (EXTIStatus == SET)
+	{
+		GPIOA->ODR ^= GPIO_Pin_1 | GPIO_Pin_2 | GPIO_Pin_3 | GPIO_Pin_4;
+		// wait(0xfffff);
+		// 清除EXTI0线路中断标志位
+		EXTI_ClearITPendingBit(EXTI_Line0);
+	}
 }
