@@ -23,6 +23,7 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f10x_it.h"
+#include "bsp_SysTick.h"
 
 /** @addtogroup STM32F10x_StdPeriph_Template
   * @{
@@ -134,6 +135,10 @@ void PendSV_Handler(void)
   */
 void SysTick_Handler(void)
 {
+	if (TimingDelay != 0)
+	{
+		TimingDelay--;
+	}
 }
 
 /******************************************************************************/
