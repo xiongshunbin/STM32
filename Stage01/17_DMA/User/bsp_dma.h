@@ -3,7 +3,7 @@
 
 #include <stm32f10x.h>
 
-#define DATA_SIZE 1024
+#define DATA_SIZE 2000
 #define USART1_DR 0x40013804
 
 extern unsigned char arr[DATA_SIZE];
