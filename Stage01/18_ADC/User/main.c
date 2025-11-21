@@ -9,6 +9,9 @@
 
 int main(void)
 {
+	float temperature;
+	float adcx;
+	
 	SysTick_Configuration();
 	
 	UART1_Configuration();
@@ -17,6 +20,10 @@ int main(void)
 	
 	while (1)
 	{
-
+		// Temperature = {(V25 - Vsense) / Avg_Slope} + 25
+		adcx = ADC_ConvertVal * 3.3 / 4096;
+		temperature = (1.43 - adcx) / 0.0043 + 25;
+		printf("Temperature = %.1f\n", temperature);
+		Delay_us(1000000);
 	}
 }

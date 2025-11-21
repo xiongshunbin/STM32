@@ -50,10 +50,10 @@ void ADC_Configuration(void)
 	ADC_Cmd(ADC1, ENABLE);
 	// 重置ADC1的校准寄存器
 	ADC_ResetCalibration(ADC1);
-	while (ADC_GetResetCalibrationStatus(ADC1) != SET);
+	while (ADC_GetResetCalibrationStatus(ADC1) != RESET);
 	// 开始ADC1的校准状态
-	ADC_StartCalibration(ADC2);
-	while (ADC_GetCalibrationStatus(ADC1) != SET);
+	ADC_StartCalibration(ADC1);
+	while (ADC_GetCalibrationStatus(ADC1) != RESET);
 	
 	// 使能ADC1的软件转换启动功能
 	ADC_SoftwareStartConvCmd(ADC1, ENABLE);

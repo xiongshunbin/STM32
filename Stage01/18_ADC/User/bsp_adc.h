@@ -3,7 +3,9 @@
 
 #include <stm32f10x.h>
 
-#define ADC_DR 0x4001244C
+#define ADC_DR 		0x4001244C
+
+extern uint16_t ADC_ConvertVal;
 
 void ADC_Configuration(void);
 
