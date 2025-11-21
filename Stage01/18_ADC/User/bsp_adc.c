@@ -38,5 +38,23 @@ void ADC_Configuration(void)
 	ADC_Init(ADC1, &ADC_InitStructure);
 	
 	// 设置ADC的输入时钟为9MHz
-	RCC_ADCCLKConfig(RCC_PCLK2_Div8);
+	RCC_ADCCLKConfig(RCC_PCLK2_Div8);		// 频率 <= 14MHz
+	// 设置ADC1的通道16的采样时间
+	ADC_RegularChannelConfig(ADC1, ADC_Channel_16, 1, ADC_SampleTime_55Cycles5);	// Tconv = 55.5 + 12.5 = 68
+	// 使能ADC1通道16的温度传感器
+	ADC_TempSensorVrefintCmd(ENABLE);
+	
+	// 使能ADC1的DMA请求
+	ADC_DMACmd(ADC1, ENABLE);
+	// 使能ADC1	
+	ADC_Cmd(ADC1, ENABLE);
+	// 重置ADC1的校准寄存器
+	ADC_ResetCalibration(ADC1);
+	while (ADC_GetResetCalibrationStatus(ADC1) != SET);
+	// 开始ADC1的校准状态
+	ADC_StartCalibration(ADC2);
+	while (ADC_GetCalibrationStatus(ADC1) != SET);
+	
+	// 使能ADC1的软件转换启动功能
+	ADC_SoftwareStartConvCmd(ADC1, ENABLE);
 }
