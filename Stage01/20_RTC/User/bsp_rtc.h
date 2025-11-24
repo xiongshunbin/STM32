@@ -17,8 +17,10 @@ struct rtc_tm
 	unsigned int second;
 };
 
-void RTC_Configuration(void);
+int RTC_Configuration(void);
 
 void Time_Display(uint32_t TimeVal);
+
+void Set_Time(void);
 
 #endif

@@ -11,11 +11,18 @@
 
 int main(void)
 {
+	int flag;
+	
 	SysTick_Configuration();
 	
-	RTC_Configuration();
+	flag = RTC_Configuration();
 	
 	UART1_Configuration();
+	
+	if (flag == 0)	// 没有配置过RTC时间, 需要设置为当前时间
+	{
+		Set_Time();
+	}
 	
 	while (1)
 	{
