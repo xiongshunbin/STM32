@@ -1,5 +1,8 @@
 #include "bsp_uart.h"
 
+uint8_t receiveData[MAX_RECVDATA_SIZE] = { 0 };
+uint8_t dataSize = 0;
+
 void UART1_Configuration(void)
 {
 	GPIO_InitTypeDef GPIO_InitStructure;
@@ -75,6 +78,7 @@ int fgetc(FILE *stream)
 	return USART_ReceiveData(USART1);
 }
 
+/*
 void USART1_IRQHandler(void)
 {
 	unsigned char ch;
@@ -83,5 +87,91 @@ void USART1_IRQHandler(void)
 	{
 		ch = USART_ReceiveData(USART1);
 		printf("%c\n", ch + 1);
+	}
+}
+*/
+
+// 计算校验和
+uint8_t Calc_CheckSum(uint8_t* data, int size)
+{
+	uint8_t i;
+	uint8_t checkSum = 0;
+	for (i = 0; i < size; ++i)
+	{
+		checkSum += *(data + i);
+	}
+	return checkSum;
+}
+
+// 操作LED灯
+void LED_Operate(LED_NUM num, uint8_t state)
+{
+	uint16_t GPIO_Pin;
+	BitAction BitVal;
+	
+	if (state == LED_ON)
+		BitVal = Bit_SET;
+	else if (state == LED_OFF)
+		BitVal = Bit_RESET;
+	
+	switch (num)
+	{
+		case LED_1:	GPIO_Pin = GPIO_Pin_1;	break;
+		case LED_2:	GPIO_Pin = GPIO_Pin_2;	break;
+		case LED_3:	GPIO_Pin = GPIO_Pin_3;	break;
+		case LED_4:	GPIO_Pin = GPIO_Pin_4;	break;
+		default:	break;
+	}
+	
+	GPIO_WriteBit(GPIOA, GPIO_Pin, BitVal);
+}
+
+// 命令处理
+void CMD_Process(uint8_t* CMD_Data, int size)
+{
+	int i;
+	
+	for (i = 0; i < size; i += 2)
+	{
+		LED_Operate((LED_NUM)*(CMD_Data + i), *(CMD_Data + i + 1));
+	}
+}
+
+void USART1_IRQHandler(void)
+{
+	static uint8_t flag = 0;	// 命令开始标志位 0:未开始 1:命令开始
+	static uint8_t index = 1;
+	
+	unsigned char ch;
+	// 等待直到接收缓冲区内非空
+	while (USART_GetFlagStatus(USART1, USART_FLAG_RXNE) == SET)
+	{
+		ch = USART_ReceiveData(USART1);
+		if (ch == 0xAA)
+		{
+			receiveData[0] = 0xAA;
+			flag = 1;
+		}
+		
+		if (ch != 0xAA && flag == 1)
+		{
+			receiveData[index] = ch;
+			if (index == 1)
+			{
+				dataSize = ch;
+			}
+			index++;
+			if (index == dataSize)		// 数据帧结束
+			{
+				if(Calc_CheckSum(receiveData + 1, dataSize - 3) == receiveData[dataSize - 2] 
+					&& receiveData[dataSize - 1] == 0xFF)
+				{
+					CMD_Process(receiveData + 2, dataSize - 3);
+				}
+				dataSize = 0;
+				flag = 0;
+				index = 1;
+			}
+		}
 	}
 }

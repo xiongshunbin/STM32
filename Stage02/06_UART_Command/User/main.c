@@ -13,32 +13,16 @@
 
 int main(void)
 {
-	unsigned int TIMCounter = 0;	// 计数值
-	float distance = 0.0;			// 测距值
-	
 	SysTick_Configuration();
+	
+	LED_Configuration();
 
 	UART1_Configuration();
 	
-	TIM2_Count_Configuration();
-	
-	HCSR04_GPIO_Configuration();
-	
-	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2, ENABLE);
+	UART1_NVIC_Init();
 	
 	while (1)
 	{
-		TIM_Cmd(TIM2, ENABLE);
-		TRIG_H;
-		Delay_us(15);
-		TRIG_L;
-		while (ECHO == 0);
-		TIM_SetCounter(TIM2, 0);
-		while (ECHO == 1);
-		TIM_Cmd(TIM2, DISABLE);
-		TIMCounter = TIM_GetCounter(TIM2);
-		distance = TIMCounter * 0.000001 * SOUND_VELOCITY * 100 / 2;
-		printf("Distance = %.2fcm\n", distance);
-		Delay_us(1000000);
+
 	}
 }
