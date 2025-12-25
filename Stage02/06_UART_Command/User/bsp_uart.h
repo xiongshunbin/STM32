@@ -3,6 +3,7 @@
 
 #include <stm32f10x.h>
 #include <stdio.h>
+#include <string.h>
 
 #define MAX_RECVDATA_SIZE 255
 #define LED_ON 	0x11

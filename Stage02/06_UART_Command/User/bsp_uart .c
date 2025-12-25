@@ -144,7 +144,7 @@ void USART1_IRQHandler(void)
 	
 	unsigned char ch;
 	// 等待直到接收缓冲区内非空
-	while (USART_GetFlagStatus(USART1, USART_FLAG_RXNE) == SET)
+	if (USART_GetFlagStatus(USART1, USART_FLAG_RXNE) == SET)
 	{
 		ch = USART_ReceiveData(USART1);
 		if (ch == 0xAA)
@@ -166,8 +166,9 @@ void USART1_IRQHandler(void)
 				if(Calc_CheckSum(receiveData + 1, dataSize - 3) == receiveData[dataSize - 2] 
 					&& receiveData[dataSize - 1] == 0xFF)
 				{
-					CMD_Process(receiveData + 2, dataSize - 3);
+					CMD_Process(receiveData + 2, dataSize - 4);
 				}
+				memset(receiveData, 0, sizeof(receiveData));
 				dataSize = 0;
 				flag = 0;
 				index = 1;
