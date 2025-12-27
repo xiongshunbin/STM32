@@ -1,40 +1,8 @@
-<!-- Markdown全局样式 -->
+#include "bsp_uart.h"
 
-<!-- 表格居中 -->
-<style>
-table
-{
-    margin: auto;
-}
-</style>
+uint8_t receiveData[MAX_RECVDATA_SIZE] = { 0 };
+uint8_t dataSize = 0;
 
-<!-- -------------------------------------- -->
-
-# 自定义UART数据格式
-
-> 自定义UART数据格式常常适用于**CPU与CPU之间**、**外设与CPU之间**的通信。
-
-## 1.目的
-在串口调试助手上发送一串数据，控制4个LED灯的亮灭状态。
-
-## 2.内容
-    自定义的数据帧格式为：起始位(1B) + 数据长度(1B) + LED灯状态(2B) + 校验位(1B) + 结束位(1B)
-其中，LED灯状态(2B)由LED灯序号(1B)和状态(1B)组成，LED有两种状态：`0x00`表示灭，`0x11`表示亮。一条数据帧报文中可同时包含多组LED灯状态。校验位 = 数据长度 + LED灯状态。那么，使LED1点亮的命令格式如下表所示：
-
-|   起始位  | 数据长度 | LED灯序号 |  状态  |   校验位  |   结束位  |
-|   :---:  | :---:  |   :---:   | :---: |   :---:  |   :---:  |
-|   0xAA   |  0x06  |    0x01   |  0x11 |   0x18   |   0xFF   |
-
-## 3.示例
-eg1:LED1和LED3点亮: `AA 08 01 11 03 11 2E FF`
-
-eg2:LED1熄灭，LED2灯点亮: `AA 08 01 00 02 11 1C FF`
-
-eg3: LED2、LED3熄灭，LED4点亮: `AA 0A 02 00 03 00 04 11 24 FF`
-
-## 4.实现
-```c
-// USART配置
 void UART1_Configuration(void)
 {
 	GPIO_InitTypeDef GPIO_InitStructure;
@@ -68,7 +36,6 @@ void UART1_Configuration(void)
 	USART_Cmd(USART1, ENABLE);
 }
 
-// 初始化NVIC
 void UART1_NVIC_Init(void)
 {
 	NVIC_InitTypeDef NVIC_InitStructure;
@@ -80,6 +47,49 @@ void UART1_NVIC_Init(void)
 	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
 	NVIC_Init(&NVIC_InitStructure);
 }
+
+void USART_SendString(USART_TypeDef* USARTx, const char* pt)
+{
+	while (*pt != '\0')
+	{
+		// 确保发送缓冲区为空, 只有发送缓冲区为空才继续发送
+		while (USART_GetFlagStatus(USARTx, USART_FLAG_TXE) != SET);
+		USART_SendData(USARTx, *pt);
+		// 等待发送完成
+		while (USART_GetFlagStatus(USARTx, USART_FLAG_TC) != SET);
+		pt++;
+	}
+}
+
+int fputc(int c, FILE* stream)
+{
+	while (USART_GetFlagStatus(USART1, USART_FLAG_TXE) != SET);
+	USART_SendData(USART1, c);
+	// 等待发送完成
+	while (USART_GetFlagStatus(USART1, USART_FLAG_TC) != SET);
+	
+	return 0;
+}
+
+int fgetc(FILE *stream)
+{
+	// 等待直到接收缓冲区内非空
+	while (USART_GetFlagStatus(USART1, USART_FLAG_RXNE) != SET);
+	return USART_ReceiveData(USART1);
+}
+
+/*
+void USART1_IRQHandler(void)
+{
+	unsigned char ch;
+	// 等待直到接收缓冲区内非空
+	if (USART_GetFlagStatus(USART1, USART_FLAG_RXNE) == SET)
+	{
+		ch = USART_ReceiveData(USART1);
+		printf("%c\n", ch + 1);
+	}
+}
+*/
 
 // 计算校验和
 uint8_t Calc_CheckSum(uint8_t* data, int size)
@@ -127,7 +137,6 @@ void CMD_Process(uint8_t* CMD_Data, int size)
 	}
 }
 
-// USART中断处理函数的实现
 void USART1_IRQHandler(void)
 {
 	static uint8_t flag = 0;	// 命令开始标志位 0:未开始 1:命令开始
@@ -167,18 +176,3 @@ void USART1_IRQHandler(void)
 		}
 	}
 }
-
-int main(void)
-{
-	LED_Configuration();
-
-	UART1_Configuration();
-	
-	UART1_NVIC_Init();
-	
-	while (1)
-	{
-
-	}
-}
-```
