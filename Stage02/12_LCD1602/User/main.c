@@ -25,6 +25,9 @@ int main(void)
 	
 	LCD1602_Init();
 	
+	LCD1602_ShowString(1, 0, "STM32F103C8T6");
+	LCD1602_ShowString(0, 1, "I love you, hyt");
+	
 	while (1)
 	{
 
