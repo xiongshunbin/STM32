@@ -19,6 +19,8 @@ unsigned int count = 0;
 
 int main(void)
 {
+	unsigned int n = 0;
+	
 	SysTick_Configuration();
 	
 	LCD1602_GPIO_Configuration();
@@ -26,10 +28,16 @@ int main(void)
 	LCD1602_Init();
 	
 	LCD1602_ShowString(1, 0, "STM32F103C8T6");
-	LCD1602_ShowString(0, 1, "I love you, hyt");
+	LCD1602_ShowString(0, 1, "I love you, hyt!");
+	
+	Delay_us(3000000);
+	LCD1602_ClearScreen();
 	
 	while (1)
 	{
-
+		LCD1602_ShowNum(1, 1, n++);
+		
+		LCD1602_WriteCmd(0x18);
+		Delay_us(1000000);
 	}
 }

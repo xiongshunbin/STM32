@@ -2,6 +2,7 @@
 #define __BSP_LCD1602_H__
 
 #include <stm32f10x.h>
+#include <stdio.h>
 #include "bsp_SysTick.h"
 
 #define 	LCD1602_RS_Low()			GPIO_ResetBits(GPIOA, GPIO_Pin_5)
@@ -69,10 +70,15 @@ void LCD1602_Init(void);
 
 void LCD1602_ClearScreen(void);		// 清屏指令
 
+void LCD1602_WriteCmd(uint8_t cmd);	// 写命令
+
 // 显示字符
 void LCD1602_ShowChar(uint8_t x, uint8_t y, uint8_t data);
 
 // 显示字符串
 void LCD1602_ShowString(uint8_t x, uint8_t y, unsigned char* str);
+
+// 显示数字
+void LCD1602_ShowNum(uint8_t x, uint8_t y, int num);
 
 #endif	// __BSP_LCD1602_H__

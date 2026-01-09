@@ -144,3 +144,12 @@ void LCD1602_ShowString(uint8_t x, uint8_t y, unsigned char* str)
 		LCD1602_WriteData(*str++);
 	}
 }
+
+void LCD1602_ShowNum(uint8_t x, uint8_t y, int num)
+{
+	unsigned char tmp[16] = { 0 };
+	
+	sprintf((char*)tmp, "%d", num);
+	
+	LCD1602_ShowString(x, y, tmp);
+}
